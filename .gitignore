@@ -1,4 +1,6 @@
-.deb
+*.deb
 logs/
 .code-server*
 *.log
+*.swp
+*~
