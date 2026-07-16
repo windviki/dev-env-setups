@@ -1,0 +1,139 @@
+{
+if [ -n "$ZSH_VERSION" ]; then
+___x_cmd_inner_cd(){
+builtin cd "$@" || return $?;
+};
+else
+___x_cmd_inner_cd(){
+command cd "$@" || return $?;
+};
+fi;
+___x_cmd_get_log(){
+printf "[%s] %s\n" "$(command date +"%Y-%m-%d/%H:%M:%S")" "$1" | command tee -a "$___X_CMD_ROOT/setup.log" >&2 ;
+};
+___x_cmd_get_download(){
+local tmptgt="$1";
+local url="https://x-cmd-resource.oss-cn-heyuan.aliyuncs.com/x-cmd/release";
+case "$___X_CMD_VERSION" in
+latest|alpha|beta) url="$url/dist/${___X_CMD_VERSION}.tgz" ;;
+v0.1.*|v0.2.*|v0.3.*|v0.4.*|v0.5.0|v0.5.1)
+url="$url/dist/${___X_CMD_VERSION}/full.tgz" ;;
+v*) url="$url/dist/${___X_CMD_VERSION}/allinone.tgz" ;;
+*) url="$url/sum/${___X_CMD_VERSION}.tgz" ;;
+esac;
+local target="$tmptgt/download_tmp.tgz";
+[ ! -d "${tmptgt}" ] || {
+___x_cmd_get_log "Folder already existed ==> There must be other process is installing x-cmd ==> $tmptgt";
+return 1;
+};
+(
+command mkdir -p "${tmptgt}"; ___x_cmd_inner_cd "${tmptgt}";
+___x_cmd_get_log "Download script archieve from $url";
+if command -v curl >/dev/null; then
+command curl --fail "$url" >"$target" 2>/dev/null;
+else
+command wget -O "$target" "$url" 2>/dev/null;
+fi || {
+command rm -rf "$tmptgt";
+___x_cmd_get_log "Fail to download from: $url";
+exit 1;
+};
+___x_cmd_get_log "Download SUCCESS: $target ( size: $(command wc -c "$target" 2>/dev/null | command awk '{print ((int($1) + 1023 ) / 1024); }') KB )";
+command touch "$tmptgt/setup.log";
+command tar vxf "$target" 2>>"$tmptgt/setup.log" 1>&2;
+);
+};
+___x_cmd_get_populate(){
+local tmptgt="$1"; local sumfp="$tmptgt/.x-cmd/metadata/version_sum";
+[ ! -r "$sumfp" ] || . "$sumfp";
+[ -n "$___X_CMD_VERSION_SUM" ] || {
+___x_cmd_get_log "Fail to get version sum from: $sumfp";
+return 1;
+};
+___X_CMD_VERSION_SUM8="${___X_CMD_VERSION_SUM%"${___X_CMD_VERSION_SUM#????????}"}";
+local target="$tmptgt/download_tmp.tgz";
+local archivedir="$___X_CMD_ROOT/global/shared/version/archive";
+local archivefile="$archivedir/.${___X_CMD_VERSION_SUM8}.tgz";
+command mkdir -p "$archivedir";
+command mv -f "$target" "$archivefile";
+___x_cmd_get_log "Archival SUCCESS: $target";
+local sum8dir="$___X_CMD_ROOT/v/.${___X_CMD_VERSION_SUM8}";
+[ ! -e "$sum8dir" ] || {
+___x_cmd_get_log "Folder already existed ==> $sum8dir";
+command rm -rf "${tmptgt}";
+return 0;
+};
+command rm -rf "$sum8dir";
+command mv "${tmptgt}" "$sum8dir";
+};
+___x_cmd_get_link(){
+local vpath="$___X_CMD_ROOT/v/$___X_CMD_VERSION";
+case "$___X_CMD_VERSION" in
+latest|alpha|beta|v*)
+command rm -rf "$vpath";
+command mkdir -p "$vpath";
+(
+printf "___X_CMD_VERSION0=%s\n" "${___X_CMD_VERSION}";
+printf "___X_CMD_VERSION=%s\n" ".${___X_CMD_VERSION_SUM8}";
+printf ". \"\$___X_CMD_ROOT/v/%s/X\"\n" ".${___X_CMD_VERSION_SUM8}";
+) >"$vpath/X";
+;;
+*)
+[ "$___X_CMD_VERSION" = "$___X_CMD_VERSION_SUM" ] || {
+___x_cmd_get_log "Exit for unknown situation when ___X_CMD_VERSION is $___X_CMD_VERSION";
+return 1;
+};
+___X_CMD_VERSION=".${___X_CMD_VERSION_SUM8}";
+;;
+esac;
+};
+___x_cmd_get_bootinit()(
+___X_CMD_ROOT_V_VERSION_TRICK_0_1="$___X_CMD_ROOT/v/${___X_CMD_VERSION_SUM}" \
+___X_CMD_ROOT="$___X_CMD_ROOT" \
+___X_CMD_VERSION="$___X_CMD_VERSION" \
+___X_CMD_ROOT_CODE="" \
+___X_CMD_ROOT_MOD="" \
+___X_CMD_RUNMODE="$___X_CMD_RUNMODE" \
+___X_CMD_ADVISE_DISABLE=1 \
+___X_CMD_WEBSRC_REGION=cn \
+sh -c '
+. "$___X_CMD_ROOT/v/$___X_CMD_VERSION/X";
+___X_CMD_ROOT_V_VERSION="$___X_CMD_ROOT_V_VERSION_TRICK_0_1";
+[ -z "$___X_CMD_VERSION0" ] || ___X_CMD_VERSION="$___X_CMD_VERSION0";
+___x_cmd boot init "$___X_CMD_ROOT" "$___X_CMD_VERSION";
+';
+);
+___x_cmd_get_install(){
+local ___X_CMD_ROOT="$1";
+local ___X_CMD_VERSION="$2";
+local ___X_CMD_VERSION_SUM8=;
+local ___X_CMD_CURRENTTIME="$(command date +"%Y-%m-%d_%H-%M-%S")";
+command mkdir -p "$___X_CMD_ROOT";
+___x_cmd_get_log "------------------ $___X_CMD_CURRENTTIME";
+local tmptgt="$___X_CMD_ROOT/v/${___X_CMD_VERSION}.$$.$___X_CMD_CURRENTTIME";
+___x_cmd_get_download "$tmptgt" || return $?;
+___x_cmd_get_populate "$tmptgt" || return $?;
+___x_cmd_get_link || return $?;
+___x_cmd_get_bootinit
+};
+___x_cmd_get_start(){
+local x_cmd_root="$1";
+local x_cmd_version="$2";
+if [ -n "$___X_CMD_XBINEXP_EXIT" ]; then
+___x_cmd_get_log "This installation/upgrade is performed by an external call, so the interactive shell for the new version will not automatically open.";
+elif [ -z "$___X_CMD_ROOT_MOD" ]; then
+___X_CMD_ROOT_CODE=;
+. "$x_cmd_root/X";
+elif [ "${-#*i}" != "$-" ]; then
+___x_cmd_get_log "x-cmd detected in current shell env. Opening a new shell to avoid collision.";
+___X_CMD_ROOT_MOD= ___X_CMD_ROOT_CODE= ___X_CMD_VERSION="$x_cmd_version" "${SHELL:-/bin/sh}";
+fi;
+};
+___x_cmd_get_main(){
+local x_cmd_root="$HOME/.x-cmd.root";
+local x_cmd_version="${___X_CMD_TOINSTALL_VERSION:-latest}";
+___x_cmd_get_install "$x_cmd_root" "$x_cmd_version" || return $?;
+___x_cmd_get_start "$x_cmd_root" "$x_cmd_version"
+};
+___x_cmd_get_main;
+}

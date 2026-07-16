@@ -1,0 +1,4 @@
+.deb
+logs/
+.code-server*
+*.log
