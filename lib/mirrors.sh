@@ -98,8 +98,8 @@ github_mirror_url() {
         echo "$url"
     else
         local result="$url"
-        result="${result//https:\/\/github.com/${MIRROR_FOR_GITHUB}\/https:\/\/github.com}"
-        result="${result//https:\/\/raw.githubusercontent.com/${MIRROR_FOR_GITHUB}\/https:\/\/raw.githubusercontent.com}"
+        result="${result//https:\/\/github.com/${MIRROR_FOR_GITHUB}/https://github.com}"
+        result="${result//https:\/\/raw.githubusercontent.com/${MIRROR_FOR_GITHUB}/https://raw.githubusercontent.com}"
         echo "$result"
     fi
 }

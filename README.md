@@ -60,7 +60,7 @@ docker build -t dev-env:latest .
 
 | 参数 | 环境变量 | 默认值 | 说明 |
 |------|---------|--------|------|
-| `--cn-github-proxy` | `MIRROR_FOR_GITHUB` | `https://gh.llkk.cc` | GitHub 代理 |
+| `--cn-github-proxy` | `MIRROR_FOR_GITHUB` | `https://ghfast.top` | GitHub 代理 |
 | `--cn-apt-source` | `MIRROR_APT_SOURCE` | `mirrors.ustc.edu.cn` | APT源镜像 |
 | `--cn-docker-mirror` | `MIRROR_DOCKER` | `Aliyun` | Docker CE 镜像 |
 | `--cn-pypi-index` | `MIRROR_PYPI_INDEX` | `https://pypi.tuna.tsinghua.edu.cn/simple` | PyPI 镜像 |
@@ -79,7 +79,7 @@ docker build -t dev-env:latest .
 ### 1. GitHub 代理类（URL前缀改写）
 - **机制**: 在 `https://github.com` / `https://raw.githubusercontent.com` 前添加代理前缀
 - **影响模块**: nvm, rustup, gvm, code-server, uv
-- **示例**: `https://gh.llkk.cc/https://github.com/user/repo.git`
+- **示例**: `https://ghfast.top/https://github.com/user/repo.git`
 
 ### 2. 包管理镜像类（环境变量控制）
 - **PyPI**: 通过 `UV_DEFAULT_INDEX` 环境变量
@@ -106,7 +106,7 @@ dev-env-setups/
 │   ├── common.sh               # 公共工具函数
 │   ├── modules.sh              # 模块安装逻辑
 │   └── mirrors.sh              # 镜像配置管理
-├── install_*.sh                # 各工具官方安装脚本（参考保留）
+├── refs/install_*.sh            # 各工具官方安装脚本（参考保留）
 ├── docs/
 │   ├── design.md               # 设计文档
 │   └── user-guide.md           # 用户指南

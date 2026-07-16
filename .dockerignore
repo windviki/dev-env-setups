@@ -1,1 +1,25 @@
+# 预下载的deb包（运行时动态下载）
 code-server_*.deb
+
+# 参考脚本（非运行时依赖）
+refs/
+
+# 开发/测试/文档（非运行时依赖）
+tests/
+docs/
+exps/
+examples/
+data/
+logs/
+
+# 容器相关（不需要打包进镜像）
+docker/
+
+# Git
+.git/
+.gitignore
+.dockerignore
+
+# 项目文档
+README.md
+CLAUDE.md

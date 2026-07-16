@@ -291,6 +291,9 @@ DOCKERFILE_CN
 
     cat <<DOCKERFILE_RUN
 
+# ---------- Version Pinning ----------
+ENV CODE_SERVER_VERSION=4.128.0
+
 # ---------- Install Modules ----------
 RUN bash setup.sh ${cn_flag} --only "${modules_str}"
 

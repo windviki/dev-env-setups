@@ -369,28 +369,46 @@ install_sdkman() {
 # ============================================================================
 install_code_server() {
     local use_cn="${1:-false}"
+    local cs_version="${CODE_SERVER_VERSION:-4.128.0}"
+    local arch
+    arch=$(uname -m)
+    case "$arch" in
+        x86_64)  arch="amd64" ;;
+        aarch64) arch="arm64" ;;
+        *)       log_error "不支持的架构: $arch"; return 1 ;;
+    esac
 
-    log_step "安装 code-server..."
+    log_step "安装 code-server v${cs_version} (${arch})..."
 
-    local cs_url="https://code-server.dev/install.sh"
+    local cs_url="https://github.com/coder/code-server/releases/download/v${cs_version}/code-server-${cs_version}-linux-${arch}.tar.gz"
 
-    curl -fsSL "$cs_url" -o "${INSTALL_TMPDIR}/install_code_server.sh"
-
-    if [ "$use_cn" = "true" ]; then
-        sed_github_mirror "${INSTALL_TMPDIR}/install_code_server.sh"
+    if [ "$use_cn" = "true" ] && [ -n "${MIRROR_FOR_GITHUB:-}" ]; then
+        cs_url=$(github_mirror_url "$cs_url")
+        log_info "使用 GitHub 代理下载 code-server"
     fi
 
-    chmod +x "${INSTALL_TMPDIR}/install_code_server.sh"
-    bash "${INSTALL_TMPDIR}/install_code_server.sh" --method standalone
+    log_info "下载 code-server release (~188MB, 可能需要几分钟)..."
+    curl -fsSL --connect-timeout 30 --max-time 900 --retry 3 \
+        -o "${INSTALL_TMPDIR}/code-server.tar.gz" \
+        "$cs_url"
 
-    log_info "安装 GitHub Copilot 扩展..."
-    if command_exists code-server; then
+    log_info "安装 code-server 到 /usr/local..."
+    sudo_cmd mkdir -p /usr/local/lib /usr/local/bin
+    sudo_cmd tar -C /usr/local/lib -xzf "${INSTALL_TMPDIR}/code-server.tar.gz"
+    sudo_cmd mv "/usr/local/lib/code-server-${cs_version}-linux-${arch}" \
+                "/usr/local/lib/code-server-${cs_version}"
+    sudo_cmd ln -fs "/usr/local/lib/code-server-${cs_version}/bin/code-server" \
+                     /usr/local/bin/code-server
+
+    # GitHub Copilot 扩展安装（仅在非 Docker 环境尝试，需要访问 VS Code marketplace）
+    if ! is_docker_env && command_exists code-server; then
+        log_info "安装 GitHub Copilot 扩展..."
         export EXTENSIONS_GALLERY='{"serviceUrl": "https://marketplace.visualstudio.com/_apis/public/gallery", "itemUrl": "https://marketplace.visualstudio.com/items"}'
         code-server --install-extension github.copilot --force 2>/dev/null || \
             log_warn "GitHub Copilot 扩展安装失败（可能需要 code-server 重启后手动安装）"
     fi
 
-    log_info "code-server 安装完成"
+    log_info "code-server v${cs_version} 安装完成"
 }
 
 # ============================================================================
