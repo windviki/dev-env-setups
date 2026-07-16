@@ -59,7 +59,7 @@ run_test "docker with only uv" "Modules: uv" bash setup.sh --docker --only uv
 # Test 4: Mirror configuration
 echo ""
 echo "[4] Mirror config tests"
-run_test "default github proxy" "gh.llkk.cc" bash -c 'source lib/mirrors.sh && echo $MIRROR_FOR_GITHUB'
+run_test "default github proxy" "ghfast.top" bash -c 'source lib/mirrors.sh && echo $MIRROR_FOR_GITHUB'
 run_test "default pypi index" "tuna.tsinghua" bash -c 'source lib/mirrors.sh && echo $MIRROR_PYPI_INDEX'
 DOCKERFILE_CN=$(bash setup.sh --cn --docker --only base)
 run_test "dockerfile contains mirror env" "MIRROR_FOR_GITHUB" echo "$DOCKERFILE_CN"

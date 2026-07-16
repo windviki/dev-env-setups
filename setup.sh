@@ -254,7 +254,7 @@ RUN set -eux; \\
         net-tools iputils-ping telnet \\
         pkg-config autoconf automake g++ \\
         libssl-dev libexpat1-dev libpcre3-dev \\
-        libcap-dev bison flex && \\
+        libcap-dev bison flex bsdmainutils && \\
     rm -rf /var/lib/apt/lists/*
 
 # Copy the setup scripts into the image

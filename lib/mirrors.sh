@@ -2,42 +2,66 @@
 # Mirror configuration for China mainland network environment
 # Each mirror type can be overridden via environment variable or command-line argument.
 #
-# Mirror Types:
+# Mirror Types (11 kinds, 4 categories):
+#
 #   1. GITHUB_PROXY    - Prepend proxy prefix to github.com URLs in install scripts
 #                        Env: MIRROR_FOR_GITHUB
-#                        Default: https://gh.llkk.cc
+#                        Default: https://ghfast.top
+#       Mechanism: URL字符串前缀改写
+#       Affect: nvm, rustup, gvm, code-server, uv
+
 #   2. APT_SOURCE      - System APT source mirror (used by linuxmirrors)
 #                        Env: MIRROR_APT_SOURCE
 #                        Default: mirrors.ustc.edu.cn
-#   3. DOCKER_MIRROR   - Docker CE package mirror
+#       Mechanism: linuxmirrors 脚本替换 /etc/apt/sources.list
+
+#   3. DOCKER_MIRROR   - Docker CE package mirror (Aliyun/AzureChinaCloud)
 #                        Env: MIRROR_DOCKER
 #                        Default: Aliyun
+#       Mechanism: --mirror 命令行参数
+
 #   4. PYPI_INDEX      - PyPI mirror for Python packages
 #                        Env: MIRROR_PYPI_INDEX
 #                        Default: https://pypi.tuna.tsinghua.edu.cn/simple
+#       Mechanism: UV_DEFAULT_INDEX 环境变量
+
 #   5. NPM_REGISTRY    - npm registry mirror
 #                        Env: MIRROR_NPM_REGISTRY
 #                        Default: https://registry.npmmirror.com
+#       Mechanism: npm config set registry 命令
+
 #   6. NODE_MIRROR     - Node.js binary download mirror
 #                        Env: MIRROR_NODE
 #                        Default: https://npmmirror.com/mirrors/node
+#       Mechanism: NVM_NODEJS_ORG_MIRROR 环境变量
+
 #   7. RUSTUP_DIST     - Rustup distribution server
 #                        Env: MIRROR_RUSTUP_DIST
 #                        Default: https://mirrors.tuna.tsinghua.edu.cn/rustup
+#       Mechanism: RUSTUP_DIST_SERVER 环境变量
+
 #   8. RUSTUP_UPDATE   - Rustup update root
 #                        Env: MIRROR_RUSTUP_UPDATE
 #                        Default: https://mirrors.tuna.tsinghua.edu.cn/rustup/rustup
-#   9. CARGO_REGISTRY  - Cargo crates.io registry mirror name (rsproxy/tuna/ustc/sjtu/rustcc)
+#       Mechanism: RUSTUP_UPDATE_ROOT 环境变量
+
+#   9. CARGO_REGISTRY  - Cargo crates.io registry mirror name
+#                        Valid: rsproxy / tuna / ustc / sjtu / rustcc / rustcc2
 #                        Env: MIRROR_CARGO_REGISTRY
 #                        Default: rsproxy
+#       Mechanism: ~/.cargo/config.toml 中 replace-with 配置
+
 #   10. GO_PROXY       - Go module proxy
 #                        Env: MIRROR_GO_PROXY
 #                        Default: https://goproxy.cn,direct
+#       Mechanism: GOPROXY 环境变量
+
 #   11. GO_BINARY      - Go binary download URL
 #                        Env: MIRROR_GO_BINARY
 #                        Default: https://mirrors.aliyun.com/golang/
+#       Mechanism: GO_BINARY_BASE_URL 环境变量
 
-MIRROR_FOR_GITHUB="${MIRROR_FOR_GITHUB:-https://gh.llkk.cc}"
+MIRROR_FOR_GITHUB="${MIRROR_FOR_GITHUB:-https://ghfast.top}"
 MIRROR_APT_SOURCE="${MIRROR_APT_SOURCE:-mirrors.ustc.edu.cn}"
 MIRROR_DOCKER="${MIRROR_DOCKER:-Aliyun}"
 MIRROR_PYPI_INDEX="${MIRROR_PYPI_INDEX:-https://pypi.tuna.tsinghua.edu.cn/simple}"
@@ -66,15 +90,27 @@ export GO_BINARY_BASE_URL="${MIRROR_GO_BINARY}"
 SHELL_ENV
 }
 
-# Github URL rewriting: prefix the github proxy to github.com URLs
+# Apply github mirror to a URL (prepend proxy prefix).
+# When MIRROR_FOR_GITHUB is empty, return the original URL unchanged.
 github_mirror_url() {
     local url="$1"
-    echo "${url//https:\/\/github.com/${MIRROR_FOR_GITHUB}/https://github.com}"
+    if [ -z "${MIRROR_FOR_GITHUB:-}" ]; then
+        echo "$url"
+    else
+        local result="$url"
+        result="${result//https:\/\/github.com/${MIRROR_FOR_GITHUB}\/https:\/\/github.com}"
+        result="${result//https:\/\/raw.githubusercontent.com/${MIRROR_FOR_GITHUB}\/https:\/\/raw.githubusercontent.com}"
+        echo "$result"
+    fi
 }
 
-# Replace github.com in a file with the mirror proxy URL
+# Replace github.com URLs in a file with mirror proxy URLs.
+# When MIRROR_FOR_GITHUB is empty, skip (direct access).
 sed_github_mirror() {
     local file="$1"
+    if [ -z "${MIRROR_FOR_GITHUB:-}" ]; then
+        return 0
+    fi
     sed -i "s|https://github\.com|${MIRROR_FOR_GITHUB}/https://github.com|g" "$file"
     sed -i "s|https://raw\.githubusercontent\.com|${MIRROR_FOR_GITHUB}/https://raw.githubusercontent.com|g" "$file"
 }

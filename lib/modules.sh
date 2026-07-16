@@ -61,7 +61,7 @@ install_base() {
             git git-core curl openssl libssl-dev wget vim \
             pkg-config autoconf automake g++ ccache \
             tcl-dev libexpat1-dev libpcre3-dev libcap-dev libcap2 \
-            bison flex ca-certificates
+            bison flex ca-certificates bsdmainutils
     elif command_exists dnf; then
         sudo_cmd dnf install -y \
             net-tools iputils telnet zip unzip \
@@ -119,11 +119,13 @@ install_uv() {
     local uv_install_url="https://astral.sh/uv/install.sh"
 
     if [ "$use_cn" = "true" ]; then
-        export UV_INSTALLER_GHE_BASE_URL="${MIRROR_FOR_GITHUB}/https://github.com"
-        export UV_PYTHON_INSTALL_MIRROR="${MIRROR_FOR_GITHUB}/https://github.com/indygreg/python-build-standalone/releases/download"
         export UV_DEFAULT_INDEX="${MIRROR_PYPI_INDEX}"
-        log_info "UV 使用 GitHub 代理: ${MIRROR_FOR_GITHUB}"
         log_info "UV 使用 PyPI 镜像: ${MIRROR_PYPI_INDEX}"
+        if [ -n "${MIRROR_FOR_GITHUB:-}" ]; then
+            export UV_INSTALLER_GHE_BASE_URL="${MIRROR_FOR_GITHUB}/https://github.com"
+            export UV_PYTHON_INSTALL_MIRROR="${MIRROR_FOR_GITHUB}/https://github.com/indygreg/python-build-standalone/releases/download"
+            log_info "UV 使用 GitHub 代理: ${MIRROR_FOR_GITHUB}"
+        fi
     fi
 
     curl -LsSf "$uv_install_url" -o "${INSTALL_TMPDIR}/install_uv.sh"
@@ -142,8 +144,8 @@ install_uv() {
     export PATH="$HOME/.local/bin:$PATH"
     log_info "uv 安装完成"
 
-    log_info "安装 Python 3.11.14..."
-    uv python install 3.11.14 2>/dev/null || log_warn "Python 3.11.14 安装可能已完成或失败"
+    log_info "安装 Python 3.11..."
+    uv python install 3.11 2>/dev/null || log_warn "Python 3.11 安装可能已完成或失败"
 
     log_info "Python 环境安装完成"
 }
@@ -159,10 +161,12 @@ install_nvm() {
     local nvm_url="https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.4/install.sh"
 
     if [ "$use_cn" = "true" ]; then
-        nvm_url="${MIRROR_FOR_GITHUB}/https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.4/install.sh"
+        nvm_url=$(github_mirror_url "https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.4/install.sh")
         export NVM_NODEJS_ORG_MIRROR="${MIRROR_NODE}"
-        log_info "NVM 使用 GitHub 代理: ${MIRROR_FOR_GITHUB}"
         log_info "NVM 使用 Node.js 镜像: ${MIRROR_NODE}"
+        if [ -n "${MIRROR_FOR_GITHUB:-}" ]; then
+            log_info "NVM 使用 GitHub 代理: ${MIRROR_FOR_GITHUB}"
+        fi
     fi
 
     curl -fsSL "$nvm_url" -o "${INSTALL_TMPDIR}/install_nvm.sh"
@@ -181,9 +185,11 @@ install_nvm() {
     setup_nvm_env
 
     log_info "安装 Node.js LTS..."
+    set +u  # nvm uses unbound variables internally
     nvm install --lts
     nvm use --lts
     nvm alias default 'lts/*'
+    set -u
 
     if [ "$use_cn" = "true" ]; then
         log_info "配置 npm 使用国内镜像: ${MIRROR_NPM_REGISTRY}"
@@ -207,12 +213,13 @@ install_rustup() {
     local rustup_url="https://sh.rustup.rs"
 
     if [ "$use_cn" = "true" ]; then
-        rustup_url="${MIRROR_FOR_GITHUB}/https://sh.rustup.rs"
         export RUSTUP_DIST_SERVER="${MIRROR_RUSTUP_DIST}"
         export RUSTUP_UPDATE_ROOT="${MIRROR_RUSTUP_UPDATE}"
-        log_info "Rustup 使用 GitHub 代理: ${MIRROR_FOR_GITHUB}"
         log_info "Rustup 使用 Dist 镜像: ${MIRROR_RUSTUP_DIST}"
         log_info "Rustup 使用 Update 镜像: ${MIRROR_RUSTUP_UPDATE}"
+        if [ -n "${MIRROR_FOR_GITHUB:-}" ]; then
+            log_info "Rustup 使用 GitHub 代理: ${MIRROR_FOR_GITHUB}"
+        fi
     fi
 
     curl --proto '=https' --tlsv1.2 -sSf "$rustup_url" -o "${INSTALL_TMPDIR}/install_rustup.sh"
@@ -226,7 +233,7 @@ install_rustup() {
         RUSTUP_UPDATE_ROOT="${RUSTUP_UPDATE_ROOT:-}" \
         bash "${INSTALL_TMPDIR}/install_rustup.sh" -y
 
-    setup_cargo_env
+    set +u; setup_cargo_env; set -u
 
     log_info "安装 Rust stable 工具链..."
     rustup toolchain install stable
@@ -282,10 +289,12 @@ install_gvm() {
     local gvm_url="https://raw.githubusercontent.com/moovweb/gvm/master/binscripts/gvm-installer"
 
     if [ "$use_cn" = "true" ]; then
-        gvm_url="${MIRROR_FOR_GITHUB}/https://raw.githubusercontent.com/moovweb/gvm/master/binscripts/gvm-installer"
-        log_info "GVM 使用 GitHub 代理: ${MIRROR_FOR_GITHUB}"
+        gvm_url=$(github_mirror_url "https://raw.githubusercontent.com/moovweb/gvm/master/binscripts/gvm-installer")
         log_info "Go 模块代理: ${MIRROR_GO_PROXY}"
         log_info "Go 二进制镜像: ${MIRROR_GO_BINARY}"
+        if [ -n "${MIRROR_FOR_GITHUB:-}" ]; then
+            log_info "GVM 使用 GitHub 代理: ${MIRROR_FOR_GITHUB}"
+        fi
     fi
 
     curl -s -S -L "$gvm_url" -o "${INSTALL_TMPDIR}/install_gvm.sh"
@@ -295,7 +304,7 @@ install_gvm() {
     fi
 
     chmod +x "${INSTALL_TMPDIR}/install_gvm.sh"
-    bash "${INSTALL_TMPDIR}/install_gvm.sh"
+    set +u; bash "${INSTALL_TMPDIR}/install_gvm.sh"; set -u
 
     if [ "$use_cn" = "true" ]; then
         sed_github_mirror "$HOME/.gvm/scripts/install"
@@ -320,11 +329,14 @@ GVM_ENV
     export GOPROXY="${MIRROR_GO_PROXY}"
     export GO_BINARY_BASE_URL="${MIRROR_GO_BINARY}"
 
+    set +u
     [ -s "$HOME/.gvm/scripts/gvm" ] && source "$HOME/.gvm/scripts/gvm"
 
     log_info "安装 Go 1.24.13（binary模式）..."
+    set +u
     gvm install go1.24.13 --binary || log_warn "Go 1.24.13 可能已安装或安装失败，请手动检查"
     gvm use go1.24.13 --default 2>/dev/null || true
+    set -u
 
     log_info "Go 环境安装完成"
 }
@@ -334,20 +346,20 @@ GVM_ENV
 # ============================================================================
 install_sdkman() {
     local use_cn="${1:-false}"
-    # sdkman uses its own API and doesn't have a well-known China mirror
-    # but we can still use the github proxy for its bootstrap if needed
 
     log_step "安装 sdkman (JDK 版本管理器)..."
 
     curl -s "https://get.sdkman.io" -o "${INSTALL_TMPDIR}/install_sdkman.sh"
     chmod +x "${INSTALL_TMPDIR}/install_sdkman.sh"
-    bash "${INSTALL_TMPDIR}/install_sdkman.sh"
+    set +u; bash "${INSTALL_TMPDIR}/install_sdkman.sh"; set -u
 
-    setup_sdkman_env
+    set +u; setup_sdkman_env; set -u
 
     log_info "安装 Java 25.0.2-ms..."
+    set +u
     sdk install java 25.0.2-ms 2>/dev/null || log_warn "Java 25.0.2-ms 可能已安装或安装失败"
     sdk default java 25.0.2-ms 2>/dev/null || true
+    set -u
 
     log_info "Java 环境安装完成"
 }
@@ -361,10 +373,6 @@ install_code_server() {
     log_step "安装 code-server..."
 
     local cs_url="https://code-server.dev/install.sh"
-
-    if [ "$use_cn" = "true" ]; then
-        cs_url="${MIRROR_FOR_GITHUB}/https://code-server.dev/install.sh"
-    fi
 
     curl -fsSL "$cs_url" -o "${INSTALL_TMPDIR}/install_code_server.sh"
 
