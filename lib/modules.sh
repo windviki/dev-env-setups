@@ -361,11 +361,48 @@ install_sdkman() {
 
     log_step "安装 sdkman (JDK 版本管理器)..."
 
+    # Use domestic mirror for SDKMAN API when in China
+    if [ "$use_cn" = "true" ]; then
+        export SDKMAN_CANDIDATES_API="https://mirror.sdkman.io/2"
+        log_info "SDKMAN 使用国内镜像 API: ${SDKMAN_CANDIDATES_API}"
+    fi
+
     curl -s "https://get.sdkman.io" -o "${INSTALL_TMPDIR}/install_sdkman.sh"
     chmod +x "${INSTALL_TMPDIR}/install_sdkman.sh"
     set +u; bash "${INSTALL_TMPDIR}/install_sdkman.sh"; set -u
 
+    # Configure SDKMAN for faster downloads
+    local sdkman_config="$HOME/.sdkman/etc/config"
+    if [ -f "$sdkman_config" ]; then
+        # Increase timeouts for slow connections
+        if ! grep -q "sdkman_curl_connect_timeout" "$sdkman_config" 2>/dev/null; then
+            cat >> "$sdkman_config" <<'SDKMAN_CONFIG'
+
+# Performance tuning (added by dev-env-setups)
+sdkman_curl_connect_timeout=30
+sdkman_curl_max_time=600
+sdkman_auto_answer=true
+sdkman_selfupdate_feature=false
+SDKMAN_CONFIG
+        fi
+    fi
+
     set +u; setup_sdkman_env; set -u
+
+    # Persist the mirror setting in shell profiles
+    if [ "$use_cn" = "true" ]; then
+        for pf in "$HOME/.bashrc" "$HOME/.profile" "$HOME/.zshrc"; do
+            if [ -f "$pf" ]; then
+                if ! grep -q "SDKMAN_CANDIDATES_API" "$pf" 2>/dev/null; then
+                    cat >> "$pf" <<'SDKMAN_PROFILE'
+
+# SDKMAN mirror (added by dev-env-setups)
+export SDKMAN_CANDIDATES_API="https://mirror.sdkman.io/2"
+SDKMAN_PROFILE
+                fi
+            fi
+        done
+    fi
 
     log_info "安装 Java 25.0.2-ms..."
     set +u

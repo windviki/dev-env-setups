@@ -88,7 +88,23 @@ echo "各模块安装时间（从构建日志提取）:"
 echo "  注: 模块在同一个RUN层中顺序执行，时间包含apt/编译/下载等"
 echo ""
 
-for mod_pair in "base:基础依赖" "docker:Docker CE" "uv:Python/uv" "nvm:Node.js" "rustup:Rust" "gvm:Go" "sdkman:Java" "code-server:code-server" "chsrc:chsrc" "xcmd:x-cmd"; do
+for mod_pair in \
+    "base:基础依赖" \
+    "docker:Docker CE" \
+    "uv:Python/uv" \
+    "nvm:Node.js" \
+    "rustup:Rust" \
+    "gvm:Go" \
+    "sdkman:Java" \
+    "rbenv:Ruby" \
+    "phpbrew:PHP" \
+    "luaenv:Lua" \
+    "rig:R语言" \
+    "sqlite3:SQLite3" \
+    "perl:Perl" \
+    "code-server:code-server" \
+    "chsrc:chsrc" \
+    "xcmd:x-cmd"; do
     mod="${mod_pair%%:*}"
     label="${mod_pair##*:}"
     analyze_module "$mod" "${label}"
@@ -104,11 +120,23 @@ cat /etc/os-release | head -n 2
 
 echo ""
 echo "--- 已安装工具 ---"
-for tool in uv node rustc go java code-server chsrc; do
+for tool in uv node rustc go java ruby php lua R perl sqlite3 composer code-server chsrc; do
     if command -v $tool &>/dev/null; then
         printf "  %-15s: %s\n" "$tool" "$($tool --version 2>&1 | head -1 | tr "\n" " ")"
     else
         printf "  %-15s: NOT FOUND\n" "$tool"
+    fi
+done
+
+echo ""
+echo "--- 版本管理器 ---"
+for mgr in nvm rbenv phpbrew luaenv rig; do
+    if command -v $mgr &>/dev/null; then
+        printf "  %-15s: installed\n" "$mgr"
+    elif [ -d "$HOME/.${mgr}" ]; then
+        printf "  %-15s: installed (dir)\n" "$mgr"
+    else
+        printf "  %-15s: NOT FOUND\n" "$mgr"
     fi
 done
 
