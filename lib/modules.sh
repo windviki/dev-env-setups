@@ -31,7 +31,7 @@ MODULE_DESC=(
     "code-server:VS Code Web服务端"
     "chsrc:全平台换源工具"
     "xcmd:x-cmd Shell工具集合"
-    "rbenv:Ruby版本管理器（rbenv+ruby-build）+ 最新稳定版Ruby"
+    "rbenv:Ruby版本管理器（rbenv+ruby-build）+ 最新稳定版Ruby（源码编译~28min）"
     "phpbrew:PHP运行时（ondrej PPA预编译）+ Composer + phpbrew版本管理器"
     "luaenv:Lua版本管理器（luaenv+lua-build）+ Lua 5.4.x + LuaRocks"
     "rig:R版本管理器（r-lib/rig）+ 最新稳定版R"
@@ -490,11 +490,15 @@ install_xcmd() {
 
 # ============================================================================
 # Module: rbenv (Ruby)
+# NOTE: Ruby has no official pre-built Linux binaries. All version managers
+# (rbenv, rvm, mise, frum) ultimately compile from source via ruby-build.
+# Brightbox PPA does not support Ubuntu 22.04 (jammy).
+# The 28-minute compilation is unavoidable on first build; Docker caches it.
 # ============================================================================
 install_rbenv() {
     local use_cn="${1:-false}"
 
-    log_step "安装 rbenv (Ruby 版本管理器)..."
+    log_step "安装 Ruby (rbenv + ruby-build 源码编译)..."
 
     # Install system dependencies for Ruby compilation
     sudo_cmd apt-get update -qq
@@ -503,7 +507,7 @@ install_rbenv() {
         libncurses5-dev libffi-dev libgdbm-dev libdb-dev \
         libssl-dev libgmp-dev
 
-    # Clone rbenv
+    # Clone rbenv via GitHub proxy
     local rbenv_url="https://github.com/rbenv/rbenv.git"
     if [ "$use_cn" = "true" ] && [ -n "${MIRROR_FOR_GITHUB:-}" ]; then
         rbenv_url="$(github_mirror_url "$rbenv_url")"
@@ -548,12 +552,11 @@ RBENV_PROFILE
         log_info "Ruby 源码镜像: ${MIRROR_RUBY_BUILD}"
     fi
 
-    # Install latest stable Ruby
-    log_info "安装最新稳定版 Ruby..."
+    # Install latest stable Ruby (source compile ~28min on 4 cores, unavoidable)
+    log_info "安装最新稳定版 Ruby（源码编译，~28分钟，首次构建后 Docker 层缓存）..."
     export CONFIGURE_OPTS="--disable-install-doc"
     export MAKE_OPTS="-j$(nproc)"
 
-    # Use version prefix to get latest 3.x
     RUBY_BUILD_MIRROR_URL="${RUBY_BUILD_MIRROR_URL:-}" \
     CONFIGURE_OPTS="${CONFIGURE_OPTS}" \
     MAKE_OPTS="${MAKE_OPTS}" \
