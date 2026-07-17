@@ -73,6 +73,25 @@ MIRROR_CARGO_REGISTRY="${MIRROR_CARGO_REGISTRY:-rsproxy}"
 MIRROR_GO_PROXY="${MIRROR_GO_PROXY:-https://goproxy.cn,direct}"
 MIRROR_GO_BINARY="${MIRROR_GO_BINARY:-https://mirrors.aliyun.com/golang/}"
 
+# 12. RUBY_BUILD_MIRROR - Ruby source tarball download mirror
+#                        Env: MIRROR_RUBY_BUILD
+#                        Default: https://mirrors.aliyun.com/ruby
+#       Mechanism: RUBY_BUILD_MIRROR_URL 环境变量
+
+# 13. RUBYGEMS_SOURCE   - RubyGems mirror for gem/bundle install
+#                        Env: MIRROR_RUBYGEMS_SOURCE
+#                        Default: https://gems.ruby-china.com
+#       Mechanism: gem sources + bundle config 命令
+
+# 14. PHP_SOURCE_MIRROR - PHP source tarball download mirror for phpbrew
+#                        Env: MIRROR_PHP_SOURCE
+#                        Default: https://mirrors.aliyun.com/php-src
+#       Mechanism: phpbrew 编译参数 --old-src-url
+
+MIRROR_RUBY_BUILD="${MIRROR_RUBY_BUILD:-https://mirrors.aliyun.com/ruby}"
+MIRROR_RUBYGEMS_SOURCE="${MIRROR_RUBYGEMS_SOURCE:-https://gems.ruby-china.com}"
+MIRROR_PHP_SOURCE="${MIRROR_PHP_SOURCE:-https://mirrors.aliyun.com/php-src}"
+
 export_mirror_env() {
     local profile_file="$1"
     cat >> "$profile_file" <<'SHELL_ENV'
@@ -87,6 +106,7 @@ export RUSTUP_UPDATE_ROOT="${MIRROR_RUSTUP_UPDATE}"
 export GO111MODULE=on
 export GOPROXY="${MIRROR_GO_PROXY}"
 export GO_BINARY_BASE_URL="${MIRROR_GO_BINARY}"
+export RUBY_BUILD_MIRROR_URL="${MIRROR_RUBY_BUILD}"
 SHELL_ENV
 }
 

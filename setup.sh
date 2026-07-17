@@ -172,6 +172,12 @@ run_install() {
         code-server) install_code_server "$use_cn" ;;
         chsrc)       install_chsrc "$use_cn" ;;
         xcmd)        install_xcmd "$use_cn" ;;
+        rbenv)       install_rbenv "$use_cn" ;;
+        phpbrew)     install_phpbrew "$use_cn" ;;
+        luaenv)      install_luaenv "$use_cn" ;;
+        rig)         install_rig "$use_cn" ;;
+        sqlite3)     install_sqlite3 "$use_cn" ;;
+        perl)        install_perl "$use_cn" ;;
     esac
 }
 
@@ -277,7 +283,10 @@ ENV MIRROR_FOR_GITHUB=${MIRROR_FOR_GITHUB} \\
     MIRROR_RUSTUP_UPDATE=${MIRROR_RUSTUP_UPDATE} \\
     MIRROR_CARGO_REGISTRY=${MIRROR_CARGO_REGISTRY} \\
     MIRROR_GO_PROXY=${MIRROR_GO_PROXY} \\
-    MIRROR_GO_BINARY=${MIRROR_GO_BINARY}
+    MIRROR_GO_BINARY=${MIRROR_GO_BINARY} \\
+    MIRROR_RUBY_BUILD=${MIRROR_RUBY_BUILD} \\
+    MIRROR_RUBYGEMS_SOURCE=${MIRROR_RUBYGEMS_SOURCE} \\
+    MIRROR_PHP_SOURCE=${MIRROR_PHP_SOURCE}
 DOCKERFILE_CN
     fi
 
@@ -298,7 +307,7 @@ ENV CODE_SERVER_VERSION=4.128.0
 RUN bash setup.sh ${cn_flag} --only "${modules_str}"
 
 # ---------- Environment Setup ----------
-ENV PATH="/root/.local/bin:/root/.nvm/versions/node/\$(node --version 2>/dev/null || echo v22)/bin:/root/.cargo/bin:/root/.gvm/gos/go1.24.13/bin:/root/.sdkman/candidates/java/current/bin:\$PATH"
+ENV PATH="/root/.local/bin:/root/.nvm/versions/node/\$(node --version 2>/dev/null || echo v22)/bin:/root/.cargo/bin:/root/.gvm/gos/go1.24.13/bin:/root/.sdkman/candidates/java/current/bin:/root/.rbenv/shims:/root/.rbenv/bin:/root/.phpbrew/bin:\$PATH"
 
 # ---------- Cleanup ----------
 RUN rm -rf /var/lib/apt/lists/* /tmp/*
