@@ -260,7 +260,8 @@ RUN set -eux; \\
         net-tools iputils-ping telnet \\
         pkg-config autoconf automake g++ \\
         libssl-dev libexpat1-dev libpcre3-dev \\
-        libcap-dev bison flex bsdmainutils && \\
+        libcap-dev bison flex bsdmainutils \\
+        iproute2 sudo && \\
     rm -rf /var/lib/apt/lists/*
 
 # Copy the setup scripts into the image
@@ -309,9 +310,16 @@ RUN bash setup.sh ${cn_flag} --only "${modules_str}"
 # ---------- Environment Setup ----------
 ENV PATH="/root/.local/bin:/root/.nvm/versions/node/\$(node --version 2>/dev/null || echo v22)/bin:/root/.cargo/bin:/root/.gvm/gos/go1.24.13/bin:/root/.sdkman/candidates/java/current/bin:/root/.rbenv/shims:/root/.rbenv/bin:/root/.phpbrew/bin:\$PATH"
 
+# ---------- User Setup ----------
+RUN useradd -m -s /bin/bash -u 1000 devuser && \\
+    echo "devuser ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/devuser && \\
+    chmod -R a+rX /root/.nvm /root/.local /root/.cargo /root/.gvm /root/.sdkman /root/.rustup /root/.rbenv /root/.luaenv 2>/dev/null || true && \\
+    chmod 755 /root
+
 # ---------- Cleanup ----------
 RUN rm -rf /var/lib/apt/lists/* /tmp/*
 
+USER devuser
 WORKDIR /workspace
 CMD ["/bin/bash"]
 DOCKERFILE_RUN
