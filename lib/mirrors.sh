@@ -8,7 +8,7 @@
 #                        Env: MIRROR_FOR_GITHUB
 #                        Default: https://ghfast.top
 #       Mechanism: URL字符串前缀改写
-#       Affect: nvm, rustup, gvm, code-server, uv
+#       Affect: nvm, rustup, gvm, code-server, uv, rbenv, phpbrew, luaenv, rig
 
 #   2. APT_SOURCE      - System APT source mirror (used by linuxmirrors)
 #                        Env: MIRROR_APT_SOURCE
