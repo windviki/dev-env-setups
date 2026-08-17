@@ -25,7 +25,7 @@ cd "$PROJECT_DIR"
 docker build \
     --progress=plain \
     -t "${IMAGE_NAME}" \
-    -f docker/Dockerfile.full \
+    -f docker/Dockerfile.example \
     . 2>&1 | while IFS= read -r line; do
     echo "[$(date +%H:%M:%S)] $line"
 done | tee "$LOG_FILE"

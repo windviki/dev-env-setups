@@ -1,6 +1,14 @@
+# Build artifacts and downloads
 *.deb
+*.tar.gz
+Dockerfile
+
+# Logs and temporary files
 logs/
-.code-server*
 *.log
 *.swp
 *~
+
+# Local tool state
+.code-server*
+.DS_Store

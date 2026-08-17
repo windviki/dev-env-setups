@@ -28,7 +28,7 @@ APP_VERSION="0.10.6"
 if [ -n "${UV_INSTALLER_GHE_BASE_URL:-}" ]; then
     INSTALLER_BASE_URL="$UV_INSTALLER_GHE_BASE_URL"
 else
-    INSTALLER_BASE_URL="${UV_INSTALLER_GITHUB_BASE_URL:-https://gh.llkk.cc/https://github.com}"
+    INSTALLER_BASE_URL="${UV_INSTALLER_GITHUB_BASE_URL:-https://github.com}"
 fi
 if [ -n "${UV_DOWNLOAD_URL:-}" ]; then
     ARTIFACT_DOWNLOAD_URL="$UV_DOWNLOAD_URL"
@@ -69,7 +69,7 @@ read -r RECEIPT <<EORECEIPT
 EORECEIPT
 
 # Some Linux distributions don't set HOME
-# https://gh.llkk.cc/https://github.com/astral-sh/uv/issues/6965#issuecomment-2915796022
+# https://github.com/astral-sh/uv/issues/6965#issuecomment-2915796022
 get_home() {
     if [ -n "${HOME:-}" ]; then
         echo "$HOME"
@@ -132,7 +132,7 @@ uv-installer.sh
 The installer for uv 0.10.6
 
 This script detects what platform you're on and fetches an appropriate archive from
-https://gh.llkk.cc/https://github.com/astral-sh/uv/releases/download/0.10.6
+https://github.com/astral-sh/uv/releases/download/0.10.6
 then unpacks the binaries and installs them to the first of the following locations
 
     \$XDG_BIN_HOME
@@ -1985,7 +1985,7 @@ ignore() {
 # use wget instead.
 downloader() {
     # Check if we have a broken snap curl
-    # https://gh.llkk.cc/https://github.com/boukendesho/curl-snap/issues/1
+    # https://github.com/boukendesho/curl-snap/issues/1
     _snap_curl=0
     if command -v curl > /dev/null 2>&1; then
       _curl_path=$(command -v curl)
@@ -2006,7 +2006,7 @@ downloader() {
       say "curl installed with snap cannot be used to install $APP_NAME"
       say "due to missing permissions. Please uninstall it and"
       say "reinstall curl with a different package manager (e.g., apt)."
-      say "See https://gh.llkk.cc/https://github.com/boukendesho/curl-snap/issues/1"
+      say "See https://github.com/boukendesho/curl-snap/issues/1"
       exit 1
     else _dld='curl or wget' # to be used in error message of need_cmd
     fi

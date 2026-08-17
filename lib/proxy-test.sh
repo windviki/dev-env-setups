@@ -16,7 +16,8 @@ DEFAULT_GITHUB_PROXY="https://ghfast.top"
 # Well-known GitHub proxy services for China mainland
 KNOWN_PROXIES=(
     "https://ghfast.top"
-    "https://gh.con.sh"
+    "https://gh-proxy.com"
+    "https://gh.llkk.cc"
     "https://gh.ddlc.top"
 )
 

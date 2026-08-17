@@ -17,14 +17,14 @@ dev-env-setups 是一个 Linux 开发环境一键部署工具。核心由 `setup
 
 ### 2. 镜像机制详细分析
 
-本项目涉及 4 大类 11 种镜像，分别采用不同的技术方案：
+本项目涉及 4 大类 14 种镜像，分别采用不同的技术方案：
 
 #### 第一类：GitHub 代理（URL 前缀改写）
 
 **原理**: 在原始 GitHub URL 前添加代理服务器前缀，例如：
 ```
 原始: https://github.com/user/repo
-代理: https://gh.llkk.cc/https://github.com/user/repo
+代理: https://ghfast.top/https://github.com/user/repo
 ```
 
 **实现**: 脚本下载后用 `sed` 全局替换 `github.com` 和 `raw.githubusercontent.com`
@@ -34,9 +34,9 @@ sed "s|https://github\.com|${MIRROR_FOR_GITHUB}/https://github.com|g"
 sed "s|https://raw\.githubusercontent\.com|${MIRROR_FOR_GITHUB}/https://raw.githubusercontent.com|g"
 ```
 
-**涉及模块**: nvm, rustup, gvm, code-server, uv（5个）
+**涉及模块**: nvm, rustup, gvm, code-server, uv, rbenv, phpbrew, luaenv, rig（9 个）
 
-**默认代理服务**: `https://gh.llkk.cc` —— 一个国内可用的 GitHub 代理。
+**默认代理服务**: `https://ghfast.top` —— 一个国内可用的 GitHub 代理。
 
 > 用户可通过访问 https://github.akams.cn/ 测速获取最佳代理地址，然后通过 `--cn-github-proxy` 或 `MIRROR_FOR_GITHUB` 覆盖。
 
@@ -79,6 +79,13 @@ registry = "https://rsproxy.cn/crates.io-index"
 ```
 
 支持的 Cargo 镜像源：`rsproxy`, `tuna`, `ustc`, `sjtu`, `rustcc`, `rustcc2`
+
+##### Ruby 生态
+- **Ruby 源码包**: `RUBY_BUILD_MIRROR_URL` 环境变量（ruby-build 使用）
+- **RubyGems**: `gem sources` + `bundle config` 命令
+
+##### PHP 生态
+- **PHP 源码包**: phpbrew 编译参数 `--old-src-url`（当前版本安装走 ondrej PPA 预编译包，phpbrew 作为可选版本管理器）
 
 ### 3. 镜像合并规则
 

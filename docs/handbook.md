@@ -312,17 +312,9 @@ curl https://get.x-cmd.com > /tmp/install_xcmd.sh
 
 ## 附录：原始项目文件的注意事项
 
-本仓库中的 `refs/install_*.sh` 文件是各工具官方安装器的原始副本或旧版副本，
-**部分文件的默认URL已硬编码了国内镜像代理地址**。具体如下：
-
-| 文件 | 硬编码的镜像 |
-|------|-------------|
-| `install_uv.sh` (第31行) | `https://gh.llkk.cc/https://github.com` |
-| `install_nvm.sh` (第84-91行) | `https://gh.llkk.cc/...` |
-| `install_gvm.sh` (第58行) | `https://gh.llkk.cc/...` |
-
-这些文件适用于使用 `gh.llkk.cc` 代理的国内网络环境。如果无法访问该代理，
-请通过 `sed` 替换为其他可用的 GitHub 代理，或还原为原始 `https://github.com`。
+本仓库中的 `refs/install_*.sh` 文件是各工具官方安装器的参考副本，
+**已还原为官方原始 URL，未硬编码任何代理地址**。setup.sh 运行时不会使用
+这些副本，而是从官方源获取最新安装脚本并动态处理镜像替换。
 
 **推荐做法**：使用一键脚本 `setup.sh`，它会从官方源获取最新安装脚本并动态
-处理镜像替换，无需依赖这些旧副本。
+处理镜像替换，无需依赖 `refs/` 下的旧副本。

@@ -22,4 +22,6 @@ docker/
 
 # 项目文档
 README.md
+README.zh-CN.md
 CLAUDE.md
+LICENSE

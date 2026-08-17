@@ -153,6 +153,54 @@ docker run -it dev-env:latest bash
 **耗时**: <1分钟  
 **安装位置**: `~/.x-cmd.root/`
 
+### rbenv - Ruby 环境
+
+安装 rbenv + ruby-build，并从源码编译最新稳定版 Ruby。
+
+**前置**: base（git、curl、编译工具链）  
+**耗时**: ~28分钟（首次源码编译，Docker 层缓存后无需重复）  
+**安装位置**: `~/.rbenv/`  
+**国内镜像**: 源码包使用 `MIRROR_RUBY_BUILD`，Gem 使用 `MIRROR_RUBYGEMS_SOURCE`
+
+### phpbrew - PHP 环境
+
+添加 ondrej/php PPA 安装最新稳定版 PHP 及常用扩展，同时安装 Composer 和 phpbrew 版本管理器。
+
+**前置**: base（curl、apt）  
+**耗时**: ~3分钟  
+**安装位置**: PHP 系统目录，Composer 在 `/usr/local/bin/`，phpbrew 在 `~/.phpbrew/`  
+**国内镜像**: Composer 使用阿里云镜像；phpbrew 源码包使用 `MIRROR_PHP_SOURCE`
+
+### luaenv - Lua 环境
+
+安装 luaenv + lua-build，编译安装最新 Lua 5.4.x 和 LuaRocks。
+
+**前置**: base（git、curl、编译工具链）  
+**耗时**: ~3分钟  
+**安装位置**: `~/.luaenv/`
+
+### rig - R 环境
+
+安装 r-lib/rig 版本管理器，并通过它安装最新稳定版 R。
+
+**前置**: base（curl、apt）  
+**耗时**: ~3分钟  
+**安装位置**: rig 在系统目录，R 版本由 rig 管理
+
+### sqlite3 - SQLite
+
+通过 apt-get 安装 SQLite3 和开发库。
+
+**前置**: base（apt）  
+**耗时**: <1分钟
+
+### perl - Perl
+
+通过 apt-get 安装 Perl 及开发库。
+
+**前置**: base（apt）  
+**耗时**: <1分钟
+
 ## 安装后配置
 
 安装完成后，请重新打开终端或执行：

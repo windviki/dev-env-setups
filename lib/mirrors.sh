@@ -2,7 +2,7 @@
 # Mirror configuration for China mainland network environment
 # Each mirror type can be overridden via environment variable or command-line argument.
 #
-# Mirror Types (11 kinds, 4 categories):
+# Mirror Types (14 kinds, 4 categories):
 #
 #   1. GITHUB_PROXY    - Prepend proxy prefix to github.com URLs in install scripts
 #                        Env: MIRROR_FOR_GITHUB
@@ -60,6 +60,21 @@
 #                        Env: MIRROR_GO_BINARY
 #                        Default: https://mirrors.aliyun.com/golang/
 #       Mechanism: GO_BINARY_BASE_URL 环境变量
+
+#   12. RUBY_BUILD     - Ruby source tarball download mirror
+#                        Env: MIRROR_RUBY_BUILD
+#                        Default: https://mirrors.aliyun.com/ruby
+#       Mechanism: RUBY_BUILD_MIRROR_URL 环境变量
+
+#   13. RUBYGEMS       - RubyGems mirror for gem/bundle install
+#                        Env: MIRROR_RUBYGEMS_SOURCE
+#                        Default: https://gems.ruby-china.com
+#       Mechanism: gem sources + bundle config 命令
+
+#   14. PHP_SOURCE     - PHP source tarball download mirror for phpbrew
+#                        Env: MIRROR_PHP_SOURCE
+#                        Default: https://mirrors.aliyun.com/php-src
+#       Mechanism: phpbrew 编译参数 --old-src-url
 
 MIRROR_FOR_GITHUB="${MIRROR_FOR_GITHUB:-https://ghfast.top}"
 MIRROR_APT_SOURCE="${MIRROR_APT_SOURCE:-mirrors.ustc.edu.cn}"

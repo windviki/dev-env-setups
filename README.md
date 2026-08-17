@@ -1,140 +1,158 @@
-# dev-env-setups - 一键开发环境搭建
+# dev-env-setups
 
-全自动 Linux 开发环境安装脚本集合，支持 Python/Node.js/Rust/Go/Java/Docker/code-server 等核心开发工具链的一键部署。
+One-command development environment setup for Linux, designed to be China-mainland friendly with automatic mirror configuration.
 
-## 快速开始
+[中文文档](README.zh-CN.md)
+
+## Features
+
+- **One command** installs 16 development modules: Python, Node.js, Rust, Go, Java, Ruby, PHP, Lua, R, SQLite, Perl, Docker, code-server, and more.
+- **China mirror support** (`--cn`) with 14 configurable mirrors for GitHub, APT, PyPI, npm, Rust, Go, RubyGems, PHP, etc.
+- **Local install mode** or **Dockerfile generation mode** (`--docker`).
+- **Flexible module selection** with `--only` / `--skip`.
+- **Proxy speed detection** helper (`lib/proxy-test.sh`).
+
+## Quick Start
 
 ```bash
-# 国际网络环境 - 安装全部模块
+# Install everything (international network)
 ./setup.sh
 
-# 中国大陆网络环境 - 安装全部模块（自动配置镜像加速）
+# Install everything (China mainland network, automatic mirrors)
 ./setup.sh --cn
 
-# 只安装 Python + Node.js
+# Install only Python + Node.js
 ./setup.sh --cn --only uv,nvm
 
-# 安装全部但跳过 Docker
+# Install everything except Docker
 ./setup.sh --skip docker
 
-# 生成 Dockerfile
+# Generate a Dockerfile instead of installing locally
 ./setup.sh --cn --docker > Dockerfile
 docker build -t dev-env:latest .
 ```
 
-## 前置要求
+## Requirements
 
-- **操作系统**: Ubuntu 22.04+ / Debian 11+ / CentOS 7+ / Fedora / Rocky Linux
-- **软件**: bash, curl, wget, git
-- **权限**: sudo 或 root
+- **OS**: Ubuntu 22.04+ / Debian 11+ / CentOS 7+ / Fedora / Rocky Linux
+- **Software**: bash, curl, wget, git
+- **Permissions**: sudo or root
 
-## 包含模块
+## Modules
 
-| 模块 | 说明 | 安装内容 |
-|------|------|---------|
-| `base` | 系统基础环境 | build-essential, git, curl, 编译工具链, APT源配置 |
+| Module | Description | Installs |
+|--------|-------------|----------|
+| `base` | System base environment | build-essential, git, curl, toolchain, APT mirror setup |
 | `docker` | Docker CE | Docker Engine, CLI, Compose, Buildx |
-| `uv` | Python 环境 | uv 包管理器 + Python 3.11.14 |
-| `nvm` | Node.js 环境 | nvm 版本管理 + Node.js LTS + npm 全局包 |
-| `rustup` | Rust 环境 | rustup 工具链管理 + Rust stable |
-| `gvm` | Go 环境 | gvm 版本管理 + Go 1.24.13 |
-| `sdkman` | Java 环境 | sdkman JDK管理 + Java 25.0.2-ms |
-| `code-server` | Web IDE | VS Code Server + GitHub Copilot 扩展 |
-| `chsrc` | 换源工具 | 全平台软件源切换工具 |
-| `xcmd` | Shell 工具 | x-cmd Shell 工具集合 |
+| `uv` | Python environment | uv package manager + Python 3.11 |
+| `nvm` | Node.js environment | nvm version manager + Node.js LTS + global npm packages |
+| `rustup` | Rust environment | rustup toolchain manager + Rust stable |
+| `gvm` | Go environment | gvm version manager + Go 1.24.13 (binary) |
+| `sdkman` | Java environment | sdkman JDK manager + Java 25.0.2-ms |
+| `code-server` | Web IDE | code-server + GitHub Copilot extension |
+| `chsrc` | Mirror switcher | chsrc software source switcher |
+| `xcmd` | Shell tools | x-cmd shell tool collection |
+| `rbenv` | Ruby environment | rbenv + ruby-build + latest stable Ruby (source build) |
+| `phpbrew` | PHP environment | ondrej/php PPA PHP + Composer + phpbrew |
+| `luaenv` | Lua environment | luaenv + lua-build + Lua 5.4.x + LuaRocks |
+| `rig` | R environment | r-lib/rig version manager + latest stable R |
+| `sqlite3` | SQLite | SQLite3 system install (apt-get) |
+| `perl` | Perl | Perl system install (apt-get) |
 
-## 命令行选项
+## CLI Options
 
 ```
---only MODULES       只安装指定模块（逗号分隔）
---skip MODULES       跳过指定模块（逗号分隔）
---cn                 启用中国大陆网络环境镜像加速
---docker             生成 Dockerfile 而非本地安装
---base-image IMAGE   Docker基础镜像（默认: ubuntu:22.04）
---dry-run            仅预览操作，不实际安装
+--only MODULES        Install only the specified modules (comma-separated)
+--skip MODULES        Skip the specified modules (comma-separated)
+--cn                  Enable China mainland mirror acceleration
+--docker              Generate a Dockerfile instead of installing locally
+--base-image IMAGE    Docker base image (default: ubuntu:22.04)
+--dry-run             Preview operations without installing
+-h, --help            Show help
 ```
 
-### 国内镜像参数
+## China Mirror Configuration
 
-所有镜像均可通过命令行或环境变量自定义覆盖：
+All mirrors can be overridden via command-line options or environment variables.
 
-| 参数 | 环境变量 | 默认值 | 说明 |
-|------|---------|--------|------|
-| `--cn-github-proxy` | `MIRROR_FOR_GITHUB` | `https://ghfast.top` | GitHub 代理 |
-| `--cn-apt-source` | `MIRROR_APT_SOURCE` | `mirrors.ustc.edu.cn` | APT源镜像 |
-| `--cn-docker-mirror` | `MIRROR_DOCKER` | `Aliyun` | Docker CE 镜像 |
-| `--cn-pypi-index` | `MIRROR_PYPI_INDEX` | `https://pypi.tuna.tsinghua.edu.cn/simple` | PyPI 镜像 |
-| `--cn-npm-registry` | `MIRROR_NPM_REGISTRY` | `https://registry.npmmirror.com` | npm 镜像 |
-| `--cn-node-mirror` | `MIRROR_NODE` | `https://npmmirror.com/mirrors/node` | Node.js 二进制 |
-| `--cn-rustup-dist` | `MIRROR_RUSTUP_DIST` | `https://mirrors.tuna.tsinghua.edu.cn/rustup` | Rustup 分发 |
-| `--cn-rustup-update` | `MIRROR_RUSTUP_UPDATE` | `https://mirrors.tuna.tsinghua.edu.cn/rustup/rustup` | Rustup 更新 |
-| `--cn-cargo-registry` | `MIRROR_CARGO_REGISTRY` | `rsproxy` | Cargo 镜像 |
-| `--cn-go-proxy` | `MIRROR_GO_PROXY` | `https://goproxy.cn,direct` | Go 代理 |
-| `--cn-go-binary` | `MIRROR_GO_BINARY` | `https://mirrors.aliyun.com/golang/` | Go 二进制 |
+| Option | Environment Variable | Default | Description |
+|--------|----------------------|---------|-------------|
+| `--cn-github-proxy` | `MIRROR_FOR_GITHUB` | `https://ghfast.top` | GitHub proxy |
+| `--cn-apt-source` | `MIRROR_APT_SOURCE` | `mirrors.ustc.edu.cn` | APT source mirror |
+| `--cn-docker-mirror` | `MIRROR_DOCKER` | `Aliyun` | Docker CE mirror |
+| `--cn-pypi-index` | `MIRROR_PYPI_INDEX` | `https://pypi.tuna.tsinghua.edu.cn/simple` | PyPI mirror |
+| `--cn-npm-registry` | `MIRROR_NPM_REGISTRY` | `https://registry.npmmirror.com` | npm registry |
+| `--cn-node-mirror` | `MIRROR_NODE` | `https://npmmirror.com/mirrors/node` | Node.js binaries |
+| `--cn-rustup-dist` | `MIRROR_RUSTUP_DIST` | `https://mirrors.tuna.tsinghua.edu.cn/rustup` | Rustup distribution |
+| `--cn-rustup-update` | `MIRROR_RUSTUP_UPDATE` | `https://mirrors.tuna.tsinghua.edu.cn/rustup/rustup` | Rustup updater |
+| `--cn-cargo-registry` | `MIRROR_CARGO_REGISTRY` | `rsproxy` | Cargo registry |
+| `--cn-go-proxy` | `MIRROR_GO_PROXY` | `https://goproxy.cn,direct` | Go module proxy |
+| `--cn-go-binary` | `MIRROR_GO_BINARY` | `https://mirrors.aliyun.com/golang/` | Go binary downloads |
+| `--cn-ruby-build-mirror` | `MIRROR_RUBY_BUILD` | `https://mirrors.aliyun.com/ruby` | Ruby source tarballs |
+| `--cn-rubygems-source` | `MIRROR_RUBYGEMS_SOURCE` | `https://gems.ruby-china.com` | RubyGems source |
+| `--cn-php-source` | `MIRROR_PHP_SOURCE` | `https://mirrors.aliyun.com/php-src` | PHP source tarballs |
 
-## 镜像机制概述
+> The default GitHub proxy is a public third-party service. You can override it with any prefix-style proxy, or set `MIRROR_FOR_GITHUB=""` to access GitHub directly.
 
-本项目涉及的镜像分 4 大类、11 种：
+## Mirror Mechanisms
 
-### 1. GitHub 代理类（URL前缀改写）
-- **机制**: 在 `https://github.com` / `https://raw.githubusercontent.com` 前添加代理前缀
-- **影响模块**: nvm, rustup, gvm, code-server, uv
-- **示例**: `https://ghfast.top/https://github.com/user/repo.git`
+1. **GitHub proxy** — prepend a proxy prefix to `github.com` / `raw.githubusercontent.com` URLs (nvm, rustup, gvm, code-server, uv, rbenv, phpbrew, luaenv, rig).
+2. **Package manager mirrors** — PyPI via `UV_DEFAULT_INDEX`, npm via `npm config set registry`, Node binaries via `NVM_NODEJS_ORG_MIRROR`.
+3. **Toolchain distribution mirrors** — Rust via `RUSTUP_DIST_SERVER` / `RUSTUP_UPDATE_ROOT`, Cargo via `~/.cargo/config.toml`, Go via `GOPROXY` / `GO_BINARY_BASE_URL`.
+4. **System source mirrors** — APT via linuxmirrors, Docker CE via `--mirror`.
 
-### 2. 包管理镜像类（环境变量控制）
-- **PyPI**: 通过 `UV_DEFAULT_INDEX` 环境变量
-- **npm**: 通过 `npm config set registry` 命令
-- **Node.js 二进制**: 通过 `NVM_NODEJS_ORG_MIRROR` 环境变量
+See [docs/design.md](docs/design.md) for details.
 
-### 3. 工具链分发镜像类（环境变量 + 配置文件）
-- **Rustup**: `RUSTUP_DIST_SERVER` + `RUSTUP_UPDATE_ROOT`
-- **Cargo**: `~/.cargo/config.toml` 中 `replace-with` 配置
-- **Go**: `GOPROXY` + `GO_BINARY_BASE_URL`
-
-### 4. 系统源镜像类
-- **APT**: linuxmirrors 工具脚本替换 `/etc/apt/sources.list`
-- **Docker CE**: `--mirror` 参数指定
-
-详见 [设计文档](docs/design.md)
-
-## 目录结构
+## Directory Structure
 
 ```
 dev-env-setups/
-├── setup.sh                    # 一键安装主脚本
+├── setup.sh                    # Main one-command installer
 ├── lib/
-│   ├── common.sh               # 公共工具函数
-│   ├── modules.sh              # 模块安装逻辑
-│   └── mirrors.sh              # 镜像配置管理
-├── refs/install_*.sh            # 各工具官方安装脚本（参考保留）
+│   ├── common.sh               # Shared utility functions
+│   ├── modules.sh              # Module install logic
+│   ├── mirrors.sh              # Mirror configuration management
+│   └── proxy-test.sh           # GitHub proxy speed detection
+├── refs/install_*.sh           # Upstream installer reference copies
 ├── docs/
-│   ├── design.md               # 设计文档
-│   └── user-guide.md           # 用户指南
+│   ├── design.md               # Design documentation (Chinese)
+│   ├── design.en.md            # Design documentation (English)
+│   ├── user-guide.md           # User guide (Chinese)
+│   ├── user-guide.en.md        # User guide (English)
+│   ├── handbook.md             # Manual installation handbook (Chinese)
+│   └── handbook.en.md          # Manual installation handbook (English)
 ├── tests/
-│   ├── test_docker.sh          # Docker 环境集成测试
-│   └── test_local.sh           # 本地环境单元测试
+│   ├── test_local.sh           # Local unit tests (syntax, args, modules)
+│   ├── test_docker.sh          # Docker integration test
+│   ├── test_docker_timed.sh    # Timed full Docker build test
+│   └── analyze_build_log.py    # Docker build log timing analyzer
 ├── docker/
-│   └── Dockerfile.test         # 测试用 Dockerfile
-└── logs/                       # 日志目录
+│   └── Dockerfile.example      # Example generated full Dockerfile
+├── README.md                   # This file
+├── README.zh-CN.md             # Chinese documentation
+└── LICENSE
 ```
 
-## 测试
+## Testing
 
 ```bash
-# 单元测试（语法和结构检查）
+# Unit tests (syntax and structure checks)
 bash tests/test_local.sh
 
-# Docker 环境集成测试（构建镜像并验证所有模块）
+# Docker integration test (builds an image and verifies all modules)
 bash tests/test_docker.sh
 
-# 手动测试
+# Timed full Docker build with per-module timing
+bash tests/test_docker_timed.sh
+
+# Manual dry run
 ./setup.sh --dry-run --cn --only base,uv
 ```
 
-## 贡献
+## Contributing
 
-欢迎提交 PR 和 Issue。
+Pull requests and issues are welcome. Please keep both Chinese and English documentation in sync.
 
 ## License
 
-MIT
+[MIT](LICENSE)
